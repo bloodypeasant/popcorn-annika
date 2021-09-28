@@ -4,7 +4,7 @@ const FLAME_INTERVAL = 100;
 
 export class Flame extends Actor {
   constructor() {
-    super(0.59, 0.925, 0.78, 0.1);
+    super(0.59, 0.925, 0, 0.78, 0.1);
     console.log("     constructing Flame");
     this.images = [
       new Image(),

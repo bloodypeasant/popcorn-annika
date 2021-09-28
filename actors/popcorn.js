@@ -11,7 +11,7 @@ const PAN_HEIGHT = 0.8205;
 const PAN_LEFT = 0.2075;
 const PAN_TOP = 0.05;
 
-const NUM_LANDING_ROWS = Math.ceil(PAN_HEIGHT / CORN_DIM_Y_POPPED);
+const NUM_LANDING_ROWS = Math.ceil(2*PAN_HEIGHT / CORN_DIM_Y_POPPED);
 const NUM_LANDING_COLS = Math.ceil((2 * PAN_WIDTH) / CORN_DIM_X_POPPED);
 const ROW_SIZE = PAN_HEIGHT / NUM_LANDING_ROWS;
 const COL_SIZE = PAN_WIDTH / NUM_LANDING_COLS;
@@ -56,11 +56,13 @@ export class Popcorn extends Actor {
     super(
       0.2 + 0.5 * 0.018 + 0.5 * 0.02 + (0.78 - 0.018 - 0.02) * Math.random(),
       0.847,
+      2 * Math.PI * Math.random(), // random angle
       CORN_DIM_X_UNPOPPED,
       CORN_DIM_Y_UNPOPPED
     );
     console.log("   constructing Popcorn");
     this.isPopped = false;
+    this.isLanded = false;
     this.img = new Image();
     this.img.src = "./media/images/unpopped.png";
     this.poppedImg = new Image();
@@ -72,12 +74,17 @@ export class Popcorn extends Actor {
       this.dim.y = CORN_DIM_Y_POPPED;
       this.vel.x = -0.0008 + 0.0016 * Math.random();
       this.vel.y = -0.0008;
+      this.vel.a = -0.01 + 0.02 * Math.random(); // random angular velocity
     }, 4000 + 9000 * Math.random());
   }
   update(timeChange) {
+    if (!this.isPopped || this.isLanded) {
+      return;
+    }
     this.vel.y += timeChange * G;
     this.pos.x += timeChange * this.vel.x;
     this.pos.y += timeChange * this.vel.y;
+    this.pos.a += timeChange * this.vel.a; // spin the popcorn
     if (this.pos.x < 0.2 + 0.5 * 0.015 + 0.5 * 0.06) {
       this.pos.x = 0.2 + 0.5 * 0.015 + 0.5 * 0.06;
       this.vel.x = -this.vel.x;
@@ -86,9 +93,10 @@ export class Popcorn extends Actor {
       this.pos.x = 0.98 - 0.5 * 0.015 - 0.5 * 0.06;
       this.vel.x = -this.vel.x;
     }
-    if (this.pos.y < 0.05) {
-      this.pos.y = 0.05;
-      this.vel.y = -this.vel.y;
+    if (this.pos.y < 0.5 * this.dim.y) {
+      this.pos.y = 0.5 * this.dim.y;
+      this.vel.y *= -1;
+      return;
     }
 
     let leadingRow = Math.floor(
@@ -96,33 +104,38 @@ export class Popcorn extends Actor {
     );
     let leadingCol;
     if (this.vel.x < 0) {
+      //Moving down-left
       leadingCol = Math.floor(
         (this.pos.x - 0.5 * this.dim.x - PAN_LEFT) / COL_SIZE
       );
     } else {
+      //Moving down-right
       leadingCol = Math.floor(
         (this.pos.x + 0.5 * this.dim.x - PAN_LEFT) / COL_SIZE
       );
     }
+
     let centerRow = Math.floor((this.pos.y - PAN_TOP) / ROW_SIZE);
     let centerCol;
     if (this.vel.x < 0) {
-      leadingCol = Math.floor((this.pos.x - PAN_LEFT) / COL_SIZE);
+      //Moving down-left
+      centerCol = Math.floor((this.pos.x - PAN_LEFT) / COL_SIZE);
     } else {
-      leadingCol = Math.floor((this.pos.x - PAN_LEFT) / COL_SIZE);
+      //Moving down-right
+      centerCol = Math.floor((this.pos.x - PAN_LEFT) / COL_SIZE);
     }
+    
     if (this.pos.y > 0.878 - 0.5 * 0.015 - 0.5 * 0.06) {
       this.pos.y = 0.878 - 0.5 * 0.015 - 0.5 * 0.06;
-      if (this.isPopped) {
-        this.vel.y = 0;
-        this.vel.x = 0;
-        landings[NUM_LANDING_ROWS - 1][centerCol] = true;
-      }
+      this.vel.y = 0;
+      this.vel.x = 0;
+      this.vel.a = 0; // stop spinning the corn
+      this.isLanded = true;
+      landings[NUM_LANDING_ROWS - 1][centerCol] = true;
       return;
     }
-    console.log("here A");
+
     if (this.vel.y > 0) {
-      console.log("here B");
       if (landings[leadingRow][leadingCol]) {
         if (!landings[leadingRow][centerCol]) {
           this.vel.x *= -1;
@@ -130,6 +143,8 @@ export class Popcorn extends Actor {
         }
         this.vel.y = 0;
         this.vel.x = 0;
+        this.vel.a = 0; // stop spinning the corn
+        this.isLanded = true;
         landings[centerRow][centerCol] = true;
         return;
       }

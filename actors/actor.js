@@ -5,9 +5,10 @@ let screenHeight = undefined;
 const G = 0.00000045;
 
 export class Actor {
-  constructor(posX, posY, dimX, dimY, velX = 0, velY = 0) {
+  constructor(posX, posY, posA, dimX, dimY, velX = 0, velY = 0, velA = 0) {
     console.log("   Constructing Actor");
     this.pos = {
+      a: posA,
       x: posX,
       y: posY,
     };
@@ -16,6 +17,7 @@ export class Actor {
       y: dimY,
     };
     this.vel = {
+      a: velA,
       x: velX,
       y: velY,
     };
@@ -29,6 +31,7 @@ export class Actor {
   }
   draw() {
     context.translate(this.pos.x * screenWidth, this.pos.y * screenHeight);
+    context.rotate(this.pos.a); // rotate the actor
     context.drawImage(
       this.img,
       -0.5 * this.dim.x * screenWidth,
@@ -36,6 +39,7 @@ export class Actor {
       this.dim.x * screenWidth,
       this.dim.y * screenHeight
     );
+    context.rotate(-this.pos.a); // unrotate the actor
     context.translate(-this.pos.x * screenWidth, -this.pos.y * screenHeight);
   }
   getContext() {

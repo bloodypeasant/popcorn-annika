@@ -19,7 +19,7 @@ export class Model {
       pot: new Pot(),
       temp: new Temp(),
     };
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.actors.popcorns.push(new Popcorn());
     }
   }
@@ -32,7 +32,7 @@ export class Model {
   }
   run(timeChange) {
     // console.log(" running Model");
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.actors.popcorns[i].update(timeChange);
     }
   }

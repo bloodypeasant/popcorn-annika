@@ -32,7 +32,7 @@ export class View {
     this.actors.lid.draw();
     this.actors.pot.draw();
     this.actors.temp.draw();
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 1000; i++) {
       this.actors.popcorns[i].draw();
     }
   }
